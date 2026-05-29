@@ -8,15 +8,25 @@ const genai = new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY
 });
 
-// Export the models service directly
 export const model = {
     generateContent: async (contents) => {
-        return await genai.models.generateContent({
+        // 1. Get response from new SDK structure
+        const apiResponse = await genai.models.generateContent({
             model: 'gemini-2.5-flash',
-            // Handles both a single string prompt or an array with image data
-            contents: contents 
+            contents: contents ,
+            config: {
+               responseMimeType: 'application/json',
+                maxOutputTokens: 800,
+                temperature: 0.7   // Keeps copy creative but focused
+            }
         });
+
+        // 2. Return a fake structure that mimics what your controller expects
+        return {
+            response: {
+                text: () => apiResponse.text // Sends back the clean string data
+            }
+        };
     }
 };
-
 export default genai;
